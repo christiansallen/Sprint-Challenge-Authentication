@@ -2,6 +2,7 @@ const axios = require("axios");
 const bcrypt = require("bcryptjs");
 const Users = require("../users/users-model");
 const jwt = require("jsonwebtoken");
+const db = require("../database/dbConfig");
 
 const { authenticate, jwtKey } = require("../auth/authenticate");
 
@@ -45,21 +46,38 @@ function login(req, res) {
   // implement user login
   let { username, password } = req.body;
 
-  Users.findBy({ username })
+  db("users")
+    .where({ username })
     .first()
     .then(user => {
       if (user && bcrypt.compareSync(password, user.password)) {
         const token = generateToken(user);
-        res.status(200).json({
-          message: `Hey ${user.username}, welcome! Your token is: ${token}`
-        });
+        res
+          .status(200)
+          .json({ message: `Hey ${user.username}! Your token is:`, token });
       } else {
         res
           .status(401)
-          .json({ message: "Username and password didn't match!" });
+          .json({ message: "Username and password didn't match." });
       }
     })
     .catch(() => res.status(500).json({ message: "Server error" }));
+
+  // Users.findBy({ username })
+  //   .first()
+  //   .then(user => {
+  //     if (user && bcrypt.compareSync(password, user.password)) {
+  //       const token = generateToken(user);
+  //       res.status(200).json({
+  //         message: `Hey ${user.username}, welcome! Your token is: ${token}`
+  //       });
+  //     } else {
+  //       res
+  //         .status(401)
+  //         .json({ message: "Username and password didn't match!" });
+  //     }
+  //   })
+  //   .catch(() => res.status(500).json({ message: "Server error" }));
 }
 
 function getJokes(req, res) {
