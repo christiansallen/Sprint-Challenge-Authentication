@@ -9,21 +9,8 @@ const { authenticate, jwtKey } = require("../auth/authenticate");
 module.exports = server => {
   server.post("/api/register", register);
   server.post("/api/login", login);
-  server.get("/api/jokes", authenticate, getJokes);
+  server.get("/api/jokes", authenticate, getJokes); //Must authenticate before being able to getJokes. Authenticate is middleware.
 };
-
-function generateToken(user) {
-  const payload = {
-    subject: user.id,
-    username: user.username
-  };
-
-  const options = {
-    expiresIn: "1d"
-  };
-
-  return jwt.sign(payload, jwtKey, options);
-}
 
 function register(req, res) {
   // implement user registration
@@ -40,6 +27,19 @@ function register(req, res) {
       })
       .catch(() => res.status(500).json({ message: "Server error" }));
   }
+}
+
+function generateToken(user) {
+  const payload = {
+    subject: user.id,
+    username: user.username
+  };
+
+  const options = {
+    expiresIn: "1d"
+  };
+
+  return jwt.sign(payload, jwtKey, options);
 }
 
 function login(req, res) {
